@@ -1,0 +1,68 @@
+<?php
+
+$string = $_REQUEST["string"];
+$explode = explode("=====", $string);
+
+
+
+$html = '
+				<div class="inner-content">
+					<div class="contactInfoHeader">	
+						<div class="headerTopBox">
+							<h2><a class="ui-link" href="#">Benny’s Crepe Cafe</a></h2>
+							<span class="icon-block location">Rings Fountain at Milk Street</span>
+							<div class="inline-icon">
+								<span class="icon-block time"><b>10am - 6:30pm</b></span>
+								<span class="icon-block order right"><b>Pickup: </b> 35 min</span>
+							</div>
+						</div>
+					</div>
+					<div class="fullWidth">
+
+						<table data-role="table" data-mode="columntoggle" class="ui-body-d ui-shadow table-stripe table-stroke ui-responsive" data-column-btn-theme="b" style="width:100%" >
+							<thead>
+								<tr class="ui-bar-d ui-bar-blue">
+									<th>QTY</th>
+									<th>ITEM</th>
+									<th>PRICE</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>';
+
+							for ($i=0; $i < (count($explode)-1); $i++) { 
+
+								$expld = explode("##", $explode[$i]);
+
+								$html .= '<tr>
+									<th>'.$expld[0].'</th>
+									<td>
+									<p class="split-text">
+										'.$expld[3].' <small> + '.$expld[1].'</small>
+									</p></td>
+									<td>$'.$expld[4].'</td>
+									<td><a href="#" class="delete"></a></td>
+									</tr>';
+
+
+								# code...
+							}
+								
+								
+
+							$html .='</tbody>
+						</table>
+					</div>
+					<div class="total">
+						<h3>Total: <span>$16.00</span></h3>
+					</div>
+					<div class="addItem">
+						<a href="#addItem" class="addItemLink"></a>
+					</div>
+				</div>
+
+			';
+
+
+echo $html;
+?>

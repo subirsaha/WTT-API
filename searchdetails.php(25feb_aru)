@@ -1,0 +1,773 @@
+<?php
+date_default_timezone_set('America/New_York');
+
+
+$lat = $_REQUEST["lat"];
+$long = $_REQUEST["longt"];
+$busid = $_REQUEST["busid"];
+$rp = $_REQUEST["rp"];
+$show_loc= $_REQUEST["show_loc"];
+
+$show_time= $_REQUEST["show_time"];
+$addr=$_REQUEST["addr"];
+
+
+
+$json = file_get_contents("http://dookansserver.com/Innovommerce/rest/businessinfolist/listfoodtrucks?LATLONG=".$lat.",".$long."&name=&sortBy=distance"); // this WILL do an http request for you
+$data = json_decode($json, true);
+
+$json2 = file_get_contents("http://dookansserver.com/Innovommerce/rest/businessinfolist/itemswithchoiceft?BUSINESSID=".$busid); // this WILL do an http request for you
+$data2 = json_decode($json2, true);
+
+$counter=count($data['businessInfo']);
+$html='';
+for($i=0;$i<$counter;$i++)
+{
+
+	
+														  
+
+	// echo $title= $data['businessInfo'][$i]['businessName'].'/////........////.....////';
+
+	$add = "";
+	if($data['businessInfo'][$i]['locations'][0]['address1'] == ""){
+
+		$add = "Comm Ave & St. Mary's St";
+	}else{
+
+		$add = $data['businessInfo'][$i]['locations'][0]['address1'];
+	}
+	$time_in_12_hour_format = date("h:ia", strtotime($data['businessInfo'][$i]['locations'][0]['locationHours'][0]['endTime']));
+	$time_in_12_hour_format_start = date("h:ia", strtotime($data['businessInfo'][$i]['locations'][0]['locationHours'][0]['startTime']));
+
+
+
+
+		if($data['businessInfo'][$i]['id'] == $_REQUEST['id']){
+
+
+		$html .='<div class="bar">
+						<div class="search-result-box">
+							<h3><a href="#truckDetails" class="ui-link">'.$data['businessInfo'][$i]['businessName'].'</a></h3>
+							<div class="inline-box">
+								<span>Pickup: '.$data['businessInfo'][$i]['pickupTime'].'min</span>
+								<span>$'.$data['businessInfo'][$i]['minOrderAmt'].' Minimum</span>
+								
+							</div>';
+							if($addr!="Closed for the day")
+							{
+
+							$html .='<div class="right-small-box1">
+								<span class="big-calender"></span>
+							</div>';
+						}
+						$html .='</div>';
+
+						if($addr=="Closed for the day")
+							{
+								$html .='<select name="select-choice-1" id="select-choice-1" data-mini="true">
+								<option selected="selected" value="Closed for the day">Closed for the day</option></select>';
+							}
+							else
+							{
+								$html .='<select name="select-choice-1" id="select-choice-1" data-mini="true">';
+
+												$current = $data['businessInfo'][$i]['locations'];
+						 								$strt = '';
+															$end ='';
+															$lcttn = '';
+															$dstnce = '';
+															$s=0;
+															$c=0;
+															if(is_array($current)){
+															foreach ($current as $crnt) {
+																$day=$crnt['locationHours'];
+																if(is_array($day)){
+																foreach ($day as $days) {
+																	if($days['day'] == date('l')){
+																		 $cnt = strlen($days['startTime']);
+																		 $cnt_new = strlen($days['endTime']);
+																		  $dth = date('H');
+																		 $dti = date('i');
+																		 $dt = date('Hi');
+																		if($dt <= $days['endTime'])
+																		{
+																			if($lcttn == '' && $strt == '' && $end == '' && $dstnce == '')
+																						{
+																			$nw_id = $crnt['id'];
+																			$lcttn = $crnt['address1'];
+																			$strt = $days['startTime'];
+																			$end = $days['endTime'];
+																			$dstnce = $crnt['distance'];
+																			$menuNameStr = $days['menuNameStr'];
+																						}
+																						else{
+																							if($strt >= $days['startTime'])
+																								{
+																									$nw_id = $crnt['id'];
+																							$lcttn = $crnt['address1'];
+																							$strt = $days['startTime'];
+																							$end = $days['endTime'];
+																							$dstnce = $crnt['distance'];
+																							$menuNameStr = $days['menuNameStr'];
+																							}
+																					}
+																		}
+																		$s++;
+																		
+																	}
+																	
+																	
+																}
+																}
+																		else {
+																			if($day['day'] == date('l')){
+																		 $cnt = strlen($day['startTime']);
+																		 $cnt_new = strlen($day['endTime']);
+																		  $dth = date('H');
+																		 $dti = date('i');
+																		 $dt = date('Hi');
+																		if($dt <= $day['endTime'])
+																		{
+																			if($lcttn == '' && $strt == '' && $end == '' && $dstnce == '')
+																						{
+																							$nw_id = $crnt['id'];
+																			$lcttn = $crnt['address1'];
+																			$strt = $day['startTime'];
+																			$end = $day['endTime'];
+																			$dstnce = $crnt['distance'];
+																			$menuNameStr = $day['menuNameStr'];
+																						}
+																						else{
+																							if($strt >= $day['startTime'])
+																								{
+																									$nw_id = $crnt['id'];
+																							$lcttn = $crnt['address1'];
+																							$strt = $day['startTime'];
+																							$end = $day['endTime'];
+																							$dstnce = $crnt['distance'];
+																							$menuNameStr = $day['menuNameStr'];
+																							}
+																					}
+																		}
+																		$s++;
+																		
+																	}
+																			
+																		}
+															
+															}
+															}
+																else {
+																	
+																$day=$current['locationHours'];
+																if(is_array($day)){
+																foreach ($day as $days) {
+																	if($days['day'] == date('l')){
+																		 $cnt = strlen($days['startTime']);
+																		 $cnt_new = strlen($days['endTime']);
+																		  $dth = date('H');
+																		 $dti = date('i');
+																		 $dt = date('Hi');
+																		if($dt <= $days['endTime'])
+																		{
+																			if($lcttn == '' && $strt == '' && $end == '' && $dstnce == '')
+																						{
+																							$nw_id = $crnt['id'];
+																			$lcttn = $current['address1'];
+																			$strt = $days['startTime'];
+																			$end = $days['endTime'];
+																			$dstnce = $current['distance'];
+																			$menuNameStr = $days['menuNameStr'];
+																						}
+																						else{
+																							if($strt >= $days['startTime'])
+																								{
+																									$nw_id = $crnt['id'];
+																							$lcttn = $current['address1'];
+																							$strt = $days['startTime'];
+																							$end = $days['endTime'];
+																							$dstnce = $current['distance'];
+																							$menuNameStr = $days['menuNameStr'];
+																							}
+																					}
+																		}
+																		$s++;
+																		
+																	}
+																	
+																	
+																}
+																}
+																		else {
+																			if($day['day'] == date('l')){
+																		 $cnt = strlen($day['startTime']);
+																		 $cnt_new = strlen($day['endTime']);
+																		  $dth = date('H');
+																		 $dti = date('i');
+																		 $dt = date('Hi');
+																		if($dt <= $day['endTime'])
+																		{
+																			if($lcttn == '' && $strt == '' && $end == '' && $dstnce == '')
+																						{
+																							$nw_id = $crnt['id'];
+																			$lcttn = $current['address1'];
+																			$strt = $day['startTime'];
+																			$end = $day['endTime'];
+																			$dstnce = $current['distance'];
+																			$menuNameStr = $day['menuNameStr'];
+																						}
+																						else{
+																							if($strt >= $day['startTime'])
+																								{
+																									$nw_id = $crnt['id'];
+																							$lcttn = $crnt['address1'];
+																							$strt = $day['startTime'];
+																							$end = $day['endTime'];
+																							$dstnce = $crnt['distance'];
+																							$menuNameStr = $day['menuNameStr'];
+																							}
+																					}
+																		}
+																		$s++;
+																		
+																	}
+																			
+																		}
+																	
+																}
+						if(!empty($lcttn)){
+															if(is_array($current))
+															{
+																$c++;
+													$html .= "<option selected='selected' value='".menuu.$nw_id."'>".$menuNameStr." at ".$lcttn.", ";
+															}
+															else {
+																$c++;
+													$html .= "<option selected='selected' value='".menuu.$current['id']."'>".$days['menuNameStr']." at ".$lcttn.", ";
+															}
+																						//echo $strt;
+																						//echo $end;
+																						//echo $dstnce;
+																		$cnt=strlen($strt);
+																		$cnt_new=strlen($end);
+																						if(substr($strt, 0,$cnt-2) < 12 )
+																		{
+																			if($strt != '' && $end != '' && $lcttn != '' && $dstnce != '')
+																			{
+																			$html .= '<br/>'. substr($strt, 0,$cnt-2);
+																			if(substr($strt, $cnt-2,4) != '00'){
+																			$html .= ':'.substr($strt, $cnt-2,4);
+																			}
+																			$html .= 'am - ';
+																			}
+																		}
+																		else {
+																			
+																			$stm=substr($strt, 0,$cnt-2)-12;
+																			if($stm == '0')
+																			{
+																				$html .= '<br/>'.'12';
+																			}
+																			else{
+																			$html .= '<br/>'. $stm;
+																			}
+																			if(substr($strt, $cnt-2,4) != '00'){
+																			$html .= ':'.substr($strt, $cnt-2,4);
+																			}
+																			$html .= 'pm - ';
+																		}
+																		
+																		if(substr($end,0,$cnt_new-2) < 12 )
+																		{
+																			if($strt != '' && $end != '' && $lcttn != '' && $dstnce != '')
+																			{
+																			$html .= substr($end, 0,$cnt_new-2);
+																			if(substr($end, $cnt_new-2,4) != '00'){
+																			$html .= ':'.substr($end, $cnt_new-2,4);
+																			}
+																			$html .= 'am';
+																			}
+																		}
+																		else {
+																			$lstm = substr($end, 0,$cnt_new-2)-12;
+																			$html .= $lstm;
+																			if(substr($end, $cnt_new-2,4) != '00'){
+																			$html .= ':'.substr($end, $cnt_new-2,4);
+																			}
+																			$html .= 'pm';
+																		}
+																		$html .= "</option>";
+																		}
+
+																		if($strt == '' && $end == '' && $lcttn == '' && $dstnce == '' && $s!=0)
+																		{
+																			$html .= "Closed for the day.";
+																		}
+																		if($strt == '' && $end == '' && $lcttn == '' && $dstnce == '' && $s==0)
+																						{
+																							$html .= "Closed for the day";
+																						}
+
+
+
+
+
+
+													//shwetaa
+
+
+											$p=array();	
+												
+												if(is_array($current)){
+											foreach ($current as $loc) {
+																	$day=$loc['locationHours'];
+																	if(is_array($day)){
+																	foreach ($day as $days) {
+																	if($days['day'] == date('l'))
+																	{
+																		/*echo $lcttn = $days->address1."<br/>";*/
+																		$cnt = strlen($days['startTime']);
+																		$cnt_new = strlen($days['endTime']);
+																		$dth = date('H');
+																		$dti = date('i');
+																		$dttt = date('Hi');
+																		
+																		if($dttt < $days['startTime']  && $dttt < $days['endTime'] && $lcttn!=$loc['address1'] )
+																		{
+																		$c++;
+														$html .= "<option value='".menuu.$loc['id']."'>".$days['menuNameStr']." at ".$loc['address1']." ,";
+																		if(substr($days['startTime'], 0,$cnt-2) < 12)
+																		{
+																			/*echo  substr($days->startTime, 0,$cnt-2).':';
+																			echo substr($days->startTime, $cnt-2,4);*/
+																			if(substr($days['startTime'], $cnt-2,4) != '00'){
+																			$html .= ':'.substr($days['startTime'], $cnt-2,4);
+																			}
+																			$html .= 'am - ';
+																		}
+																		else {
+																			$stmm = substr($days['startTime'], 0,$cnt-2)-12;
+																			/*echo $stmm.':';
+																			echo substr($days->startTime, $cnt-2,4);*/
+																			if($stmm == '0')
+																			{
+																				$html .= '12';
+																			}
+																			else{
+																			$html .= $stmm;
+																			}
+																			if(substr($days['startTime'], $cnt-2,4) != '00'){
+																			$html .= ':'.substr($stmm, $cnt-2,4);
+																			}
+																			$html .= 'pm - ';
+																		}
+																		
+																		if(substr($days['endTime'],  0,$cnt_new-2) < 12)
+																		{
+																			/*echo substr($days->endTime, 0,$cnt_new-2).':';
+																			echo substr($days->endTime, $cnt_new-2,4);*/
+																			if(substr($days['endTime'], $cnt_new-2,4) != '00'){
+																			$html .= ':'.substr($days['endTime'], $cnt_new-2,4);
+																			}
+																			$html .= 'am';
+																		}
+																		else {
+																			$stmnw = substr($days['endTime'], 0,$cnt_new-2)-12;
+																			//echo $stmnw;
+																			/*$html .= substr($days->endTime, $cnt_new-2,4);*/
+																			if(substr($days['endTime'], $cnt_new-2,4) != '00'){
+																			$html .= ':'.substr($days['endTime'], $cnt_new-2,4);
+																			}
+																			$html .= 'pm';
+																		}
+																		$html .= "</option>";
+																		
+																	}
+																		if($dttt > $days['startTime']  && $dttt > $days['endTime'] )
+																		{
+																			$html .= "<option value=''>".$days['menuNameStr']." at ".$loc['address1'].','." ".'Closed for the day'."</option>";
+																			$clzd = 1;
+																			$c++;
+																		}
+																	$p[$days['day']] = 1;
+															         }
+																	
+																}
+																}
+																		else {
+																			
+																	if($day['day'] == date('l'))
+																	{
+																		//echo $lcttn = $days->address1."<br/>";
+																		$cnt = strlen($day['startTime']);
+																		$cnt_new = strlen($day['endTime']);
+																		$dth = date('H');
+																		$dti = date('i');
+																		$dttt = date('Hi');
+																		
+																		if($dttt < $day['startTime']  && $dttt < $day['endTime'] && $lcttn!=$loc['address1'] )
+																		{
+																			
+																		$c++;
+														$html .= "<option value='".menuu.$loc['id']."'>".$day['menuNameStr']." at ".$loc['address1'].", ";
+																		if(substr($days['startTime'], 0,$cnt-2) < 12)
+																		{
+																			$html .=  substr($day['startTime'], 0,$cnt-2).':';
+																			$html .= substr($day['startTime'], $cnt-2,4);
+																			$html .= 'am - ';
+																		}
+																		else {
+																			$stmm = substr($day['startTime'], 0,$cnt-2)-12;
+																			$html .= $stmm.':';
+																			$html .= substr($day['startTime'], $cnt-2,4);
+																			$html .= 'pm - ';
+																		}
+																		
+																		if(substr($day['endTime'],  0,$cnt_new-2) < 12)
+																		{
+																			$html .= substr($day['endTime'], 0,$cnt_new-2).':';
+																			$html .= substr($day['endTime'], $cnt_new-2,4);
+																			$html .= 'am';
+																		}
+																		else {
+																			$stmnw = substr($day['endTime'], 0,$cnt_new-2)-12;
+																			$html .= $stmnw.':';
+																			$html .= substr($day['endTime'], $cnt_new-2,4);
+																			$html .= 'pm';
+																		}
+																		$html .= "</option>";
+																		
+																	}
+																		if($dttt > $day['startTime']  && $dttt > $day['endTime'] )
+																		{
+																			
+																			$html .= "<option value=''>".$day['menuNameStr']." at ".$loc['address1'].','." ".'Closed for the day'."</option>";
+																			$c++;
+																		}
+																		
+																		
+																																	
+																	$p[$day['day']] = 1;
+															         }
+																			 }
+																	
+																}
+																}
+																else {
+																	
+																	$day=$current['locationHours'];
+																	if(is_array($day)){
+																	foreach ($day as $days) {
+																	if($days['day'] == date('l'))
+																	{
+																		//echo $lcttn = $days->address1."<br/>";
+																		$cnt = strlen($days['startTime']);
+																		$cnt_new = strlen($days['endTime']);
+																		$dth = date('H');
+																		$dti = date('i');
+																		$dttt = date('Hi');
+																		
+																		if($dttt < $days['startTime']  && $dttt < $days['endTime'] && $lcttn!=$current['address1'] )
+																		{
+																			
+																		$c++;
+														$html .= "<option value='".menuu.$current['id']."'>".$days['menuNameStr']." at ".$current['address1'].", ";
+																		if(substr($days['startTime'], 0,$cnt-2) < 12)
+																		{
+																			$html .=  substr($days['startTime'], 0,$cnt-2).':';
+																			$html .= substr($days['startTime'], $cnt-2,4);
+																			$html .= 'am - ';
+																		}
+																		else {
+																			$stmm = substr($days['startTime'], 0,$cnt-2)-12;
+																			$html .= $stmm.':';
+																			$html .= substr($days['startTime'], $cnt-2,4);
+																			$html .= 'pm - ';
+																		}
+																		
+																		if(substr($days['endTime'],  0,$cnt_new-2) < 12)
+																		{
+																			$html .= substr($days['endTime'], 0,$cnt_new-2).':';
+																			$html .= substr($days['endTime'], $cnt_new-2,4);
+																			$html .= 'am';
+																		}
+																		else {
+																			$stmnw = substr($days['endTime'], 0,$cnt_new-2)-12;
+																			$html .= $stmnw.':';
+																			$html .= substr($days->endTime, $cnt_new-2,4);
+																			$html .= 'pm';
+																		}
+																		$html .= "</option>";
+																		
+																	}
+																		if($dttt > $days['startTime']  && $dttt > $days['endTime'] )
+																		{
+																			
+																			$html .= "<option value=''>".$days['menuNameStr']." at ".$current['address1'].','." ".'Closed for the day'."</option>";
+																			$c++;
+																		}
+																		
+																		
+																																	
+																	$p[$days['day']] = 1;
+															         }
+																	
+																}
+																}
+																		else {
+																			
+																	if($day['day'] == date('l'))
+																	{
+																		//echo $lcttn = $days->address1."<br/>";
+																		$cnt = strlen($day['startTime']);
+																		$cnt_new = strlen($day['endTime']);
+																		$dth = date('H');
+																		$dti = date('i');
+																		$dttt = date('Hi');
+																		
+																		if($dttt < $day['startTime']  && $dttt < $day['endTime'] && $lcttn!=$current['address1'] )
+																		{
+																			
+																		$c++;
+														$html .= "<option value='".menuu.$current['id']."'>".$day['menuNameStr']." at ".$current['address1'].",";
+																		if(substr($days['startTime'], 0,$cnt-2) < 12)
+																		{
+																			$html .=  substr($day['startTime'], 0,$cnt-2).':';
+																			$html .= substr($day['startTime'], $cnt-2,4);
+																			$html .= 'am - ';
+																		}
+																		else {
+																			$stmm = substr($day['startTime'], 0,$cnt-2)-12;
+																			$html .= $stmm.':';
+																			$html .= substr($day['startTime'], $cnt-2,4);
+																			$html .= 'pm - ';
+																		}
+																		
+																		if(substr($day['endTime'],  0,$cnt_new-2) < 12)
+																		{
+																			$html .= substr($day['endTime'], 0,$cnt_new-2).':';
+																			$html .= substr($day['endTime'], $cnt_new-2,4);
+																			$html .= 'am';
+																		}
+																		else {
+																			$stmnw = substr($day['endTime'], 0,$cnt_new-2)-12;
+																			$html .= $stmnw.':';
+																			$html .= substr($day['endTime'], $cnt_new-2,4);
+																			$html .= 'pm';
+																		}
+																		$html .= "</option>";
+																		
+																	}
+																		if($dttt > $day['startTime']  && $dttt > $day['endTime'] )
+																		{
+																			$c++;
+																			$html .= "<option value=''>".$day['menuNameStr']." at ".$current['address1'].','." ".'Closed for the day'."</option>";
+																		
+																		}
+																		
+																		
+																																	
+																	$p[$day['day']] = 1;
+															         }
+																			 }
+																	
+																	
+																}
+																if(empty($p))
+																	{
+																		$html .= "<option value=''>".'Closed for the day'."</option>";
+																		
+																		
+																	}
+
+										//shwetaa
+
+
+																	
+														
+											// $time_in_12_hour_format_txt = date("h:ia", strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][0]['endTime']));
+											// $time_in_12_hour_format_start_txt2 = date("h:ia", strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][0]['startTime']));
+											
+											// 	$html .='<option value="1">'.$data['businessInfo'][$i]['locations'][$j]['address1'].',  '.$time_in_12_hour_format_start_txt2.' - '.$time_in_12_hour_format_txt.'</option>';
+											
+											
+											
+										//}
+
+						   
+						$html .='</select>';
+
+							}
+						
+
+						if($addr!="Closed for the day")
+						{
+
+
+
+							$html .='<div class="collapsed-schedule">
+							<div class="schedule-box">
+								
+								<div class="scroll-box">
+									<ul class="list-date">
+										';
+
+									$counter2=count($data['businessInfo'][$i]['locations']);
+
+									
+									
+									for($j=0;$j<$counter2;$j++)
+									{
+											$newcounter=count($data['businessInfo'][$i]['locations'][$j]['locationHours']);
+
+											for($k=0;$k<$newcounter;$k++)
+											{
+												$time_in_12_hour_format_txt = date("h:ia", strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['startTime']));
+												$time_in_12_hour_format_start_txt2 = date("h:ia", strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['endTime']));
+
+												$minutes_endtime=date('i', strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['endTime']));
+
+												if($minutes_endtime>0)
+												{
+													$time_in_12_hour_format_new=date("g:ia", strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['endTime']));
+												}
+												else
+												{
+													$time_in_12_hour_format_new=date("ga", strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['endTime']));
+												}
+
+												$minutes_starttime=date('i', strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['startTime']));
+
+												if($minutes_starttime>0)
+												{
+													$time_in_12_hour_format_start_new=date("g:ia", strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['startTime']));
+												}
+												else
+												{
+													$time_in_12_hour_format_start_new=date("ga", strtotime($data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['startTime']));
+												}
+												
+																						$html .='<li>
+													<span class="location-icon"></span>
+													<h4>'.$data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['day'].' <span>'.$time_in_12_hour_format_start_new.' - '.$time_in_12_hour_format_new.'</span></h4>
+													<p>'.$data['businessInfo'][$i]['locations'][$j]['locationHours'][$k]['menuNameStr'].' @ '.$data['businessInfo'][$i]['locations'][$j]['address1'].'</p>
+												</li>';
+										   }
+									}
+										
+										
+								$html .='
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="list-truck-price">';
+
+					 $counterf=count($data2['locations'][0]['items']);
+					 if($counterf>0){
+					 // echo '<pre>';
+					 // print_r($data2['locations']['items']);
+					 // echo '</pre>';
+									// $html.=$counterf.'**';
+									for($j=0;$j<$counterf;$j++)
+										{
+											// $html .=  "arunima".$j;
+
+											//echo $item_id=$data2['locations'][0]['items']['id'];
+
+					if($rp == "yes"){
+
+							// echo "arunima";
+
+								$html .= '<div class="bar bar-default">
+							<a href="#" class="ui-link" onclick="
+savename(\'' . $data2['locations'][0]['items'][$j]['itemname'] . '\',\'' . number_format($data2['locations'][0]['items'][$j]['itemprice'], 2) . '\',\'' . $data2['locations'][0]['items'][$j]['id'] . '\',\'' . $data2['locations'][0]['items'][$j]['choiceLimit'] . '\',\'' . $data2['locations'][0]['items'][$j]['itemdesc'] . '\',\'' . $rp . '\',\'' . $data['businessInfo'][$i]['businessName'] . '\');"><div class="search-result-box">
+								<h4>'.$data2['locations'][0]['items'][$j]['itemname'].'</h4>
+								<p>'.$data2['locations'][0]['items'][$j]['itemdesc'].'</p>
+								<div class="right-small-box1">
+									<h5>$'.number_format($data2['locations'][0]['items'][$j]['itemprice'], 2).'+</h5>
+								</div>
+							</div></a>
+						</div>
+						';
+
+					}else{
+						// echo "arunimaelse";
+
+			$html .= '<div class="bar bar-default">
+										<div class="search-result-box">
+											<h4><a href="#truckdetailsPopupNot" class="ui-link" data-rel="popup" data-position-to="window" data-transition="pop">'.$data2['locations'][0]['items'][$j]['itemname'].'</a></h4>
+											<p>'.$data2['locations'][0]['items'][$j]['itemdesc'].'</p>
+											<div class="right-small-box1">
+												<h5>$'.number_format($data2['locations'][0]['items'][$j]['itemprice'], 2).'+</h5>
+											</div>
+										</div>
+									</div>
+									';
+									
+								}							
+
+
+						
+									}
+								}else if(count($data2['locations']['items'])!=0){
+									for($j=0;$j<count($data2['locations']['items']);$j++)
+										{
+											// $html .=  "arunima".$j;
+
+											//echo $item_id=$data2['locations'][0]['items']['id'];
+
+					if($rp == "yes"){
+
+							// echo "arunima";
+
+								$html .= '<div class="bar bar-default">
+							<a href="#" class="ui-link" onclick="
+savename(\'' . $data2['locations']['items'][$j]['itemname'] . '\',\'' . number_format($data2['locations']['items'][$j]['itemprice'], 2) . '\',\'' . $data2['locations']['items'][$j]['id'] . '\',\'' . $data2['locations']['items'][$j]['choiceLimit'] . '\',\'' . $data2['locations']['items'][$j]['itemdesc'] . '\',\'' . $rp . '\',\'' . $data['businessInfo'][$i]['businessName'] . '\');"><div class="search-result-box">
+								<h4>'.$data2['locations']['items'][$j]['itemname'].'</h4>
+								<p>'.$data2['locations']['items'][$j]['itemdesc'].'</p>
+								<div class="right-small-box1">
+									<h5>$'.number_format($data2['locations']['items'][$j]['itemprice'], 2).'+</h5>
+								</div>
+							</div></a>
+						</div>
+						';
+
+					}else{
+						// echo "arunimaelse";
+
+			$html .= '<div class="bar bar-default">
+										<div class="search-result-box">
+											<h4><a href="#truckdetailsPopupNot" class="ui-link" data-rel="popup" data-position-to="window" data-transition="pop">'.$data2['locations']['items'][$j]['itemname'].'</a></h4>
+											<p>'.$data2['locations']['items'][$j]['itemdesc'].'</p>
+											<div class="right-small-box1">
+												<h5>$'.number_format($data2['locations']['items'][$j]['itemprice'], 2).'+</h5>
+											</div>
+										</div>
+									</div>
+									';
+									
+								}							
+
+
+						
+									}
+								}
+									
+								$html .='</div>
+
+
+								';
+
+								}
+
+									}
+
+						
+
+}
+echo $html;
+?>

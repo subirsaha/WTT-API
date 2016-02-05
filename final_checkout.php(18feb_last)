@@ -1,0 +1,224 @@
+<?php
+$profileId = $_REQUEST["profileId"];
+$busId = $_REQUEST["busId"];
+$total = $_REQUEST["total"];
+$product_title = $_REQUEST["product_title"];
+$delivery_charge = $_REQUEST["delivery_charge"];
+$delivery_time = $_REQUEST["delivery_time"];
+$min_order_amount = $_REQUEST["min_order_amount"];
+$location = $_REQUEST["location"];
+$location_id = $_REQUEST["location_id"];
+$showtime = $_REQUEST["showtime"];
+$taxes = $_REQUEST["taxes"];
+$pickup_time = $_REQUEST["pickup_time"];
+$string = $_REQUEST["string"];
+$finalchoice_string = $_REQUEST["finalchoice_string"];
+
+$emailId = $_REQUEST["emailId"];
+$paymentProfId = $_REQUEST["paymentProfId"];
+$paymentInfo = $_REQUEST["fianlpInfo"];
+
+//$string = $_REQUEST["string"];
+$explode = explode("=====", $string);
+
+// echo "<pre>";
+// print_r($explode);
+// echo "</pre>";
+
+$oilist=array();
+
+
+
+$choice_name_price=explode('@@',$finalchoice_string);
+ if(is_array($choice_name_price))
+ {
+	foreach($choice_name_price as $id)
+	{
+	       $choice_name_id=explode('^',$id);
+	       $choice_name[]=$choice_name_id[0];
+	       $choice_id[]=$choice_name_id[1];
+	       //$option[]=$choice_name_id[2];
+	       $option[$choice_name_id[2]]=array();
+	       array_push($option[$choice_name_id[2]],$choice_name_id[0]);
+	
+	
+	
+	}
+
+ }
+
+$tot_price=0;
+for ($i=0; $i < (count($explode)-1); $i++) 
+{ 
+	 $expld = explode("##", $explode[$i]);
+
+	 $tot_price=$tot_price+$expld[5];
+
+	//  echo "<pre>";
+	// print_r($expld);
+	// echo "</pre>";
+
+	$oilist[$i]=array('itemid'=>$expld[0],
+        //'choicesName'=>implode(',',$choice_name),
+		'choicesName'=>"",
+
+		'orderitemPrice'=>number_format($expld[5],2,'.',''),
+		'choicesId'=>"",
+		'finalprice'=>number_format($tot_price,2,'.',''),
+		'comments'=>$comment,
+		'quantity'=>$expld[1],
+		'choiceprice'=>0,
+		'itemname'=>$expld[3],
+		'status'=>'C');
+
+		// echo "<pre>";
+		// 	 print_r($oilist[$i]);
+		// 	 echo "</pre>";
+			 
+			
+		$business_id[$i]=$busId;
+		$delvrycharge[$i]=$delivery_charge;
+		$pickupTime[$i]=$pickup_time;
+		$taxAmount[$i]=$taxes ;
+		$prdcost[$i]=$expld[5];
+		
+
+	
+}
+
+//echo $profileId.'@@'.$busId.'@@'.$total.'@@'.$product_title.'@@'.$delivery_charge.'@@'.$delivery_time.'@@'.$min_order_amount.'@@'.$location.'@@'.$location_id.'@@'.$taxes.'@@'.$string.'@@'.$emailId.'@@'.$paymentProfId;
+
+
+
+$data = array
+		(
+		'deviceOrderId'=>1,
+		'customerProfileId'=>$profileId,
+		'contactInfo'=>'arunima ,kolkata,kolkata,west bengal,700068,83386,arunima@esolzmail.com,9434456768',
+		'tandcversion'=>1,
+		'pickupTime'=>'10:00 am',
+		'taxAmount'=>$taxes,
+		'businessId'=>$busId,
+		'email'=>$emailId,
+		'tip'=>'0.00',
+		'phone'=>'8765456787',
+		'totalprice'=>number_format($tot_price,2,'.',''),
+		'customerProfilePaymentId'=>$paymentProfId,
+		'paymentInfo'=>$paymentInfo,
+		'finalprice'=>number_format($tot_price,2,'.',''),
+		'deliveryCharge'=>$delivery_charge,
+		'paymentMethod'=>'CARD, Already Paid',
+		'locationId'=>$location_id,
+		//'locationId'=>$this->session->userdata('location_id'),
+		'promotionValue'=>0,
+		'deliveryMethod'=>'PICKUP',
+		'status'=>'P',
+		'oilist'=>$oilist,
+							
+		);  
+
+
+// echo "<pre>";
+// 	print_r($data);
+// 	echo "<pre/>";
+
+					$httpRequest = curl_init();
+					curl_setopt($httpRequest, CURLOPT_RETURNTRANSFER, 1);
+					curl_setopt($httpRequest, CURLOPT_HTTPHEADER, array("Content-Type:  application/json"));
+					curl_setopt($httpRequest, CURLOPT_POST, 1);
+					curl_setopt($httpRequest, CURLOPT_HEADER, 0);
+    				$url = "https://dookansserver.com/Innovommerce/rest/ordercreate/order";
+    				curl_setopt($httpRequest, CURLOPT_URL, $url);
+//    				curl_setopt($httpRequest, CURLOPT_URL, 'http://dookansserver.com:8080/Innovommerce-new/rest/ordercreate/order');
+					curl_setopt($httpRequest, CURLOPT_POSTFIELDS,json_encode($data));
+					echo $returnHeader = curl_exec($httpRequest);
+
+
+					$html ='<div class="inner-content">
+					<div class="contactInfoHeader">		
+						<div class="headerTopBox">
+							<h2><a class="ui-link" href="#">'.$product_title.'</a></h2>
+							<span>'.$location.'</span>
+							<div class="inline-icon">
+								<span><b>Order:</b>123456</span>
+								<span class="right"><b>Pickup: </b> '.$pickup_time.' min</span>
+							</div>
+						</div>
+					</div>
+					
+					<div class="fullWidth">
+						<table data-role="table" data-mode="columntoggle" class="ui-body-d ui-shadow table-stripe table-stroke ui-responsive" data-column-btn-theme="b" style="width:100%">
+							<thead>
+								<tr class="ui-bar-d ui-bar-blue">
+									<th>QTY</th>
+									<th>ITEM</th>
+									<th>PRICE</th>
+								</tr>
+							</thead>
+							<tbody>';
+							$tot_price=0;
+							for ($i=0; $i < (count($explode)-1); $i++) { 
+
+								$expld = explode("##", $explode[$i]);
+
+								//echo $expld[5];
+
+								$html .= '<tr>
+									<td>'.$expld[0].'</td>
+									<td>
+									<p class="split-text">
+										'.$expld[3].' <small> + '.$expld[1].'</small>
+									</p></td>
+									<td>$'.$expld[5].'</td>';
+
+									$tot_price=$tot_price+$expld[5];
+
+							}	
+
+							$final_price=$tot_price+$taxes+2.00;
+							$html .='</tbody>
+						</table>
+					</div>
+					<div class="total">
+						<p>
+							<span class="left-label"><b>Subtotal:</b></span>
+							<span class="right">$'.$tot_price.'</span>
+						</p>
+						<p>
+							<span class="left-label"><b>Tax:</b></span>
+							<span class="right">$'.$taxes.'</span>
+						</p>
+						<p>
+							<span class="left-label"><b>Tip:</b></span>
+							<span class="right">$2.00</span>
+						</p>
+						<p style="font-size: 15px;">
+							<span class="left-label"><b>Total:</b></span>
+							<span class="right" style="font-size: 15px;"><b>$'.$final_price.'</b></span>
+						</p>
+						
+					</div>
+					
+					<div class="listGroup">
+						<div class="bar bar-default">
+							
+								<h2><b>Christos Kyriakidis</b></h2>
+								<p>'.$emailId.'</p>
+								<p>75 Crosstown Ave</p>
+								<p>West Roxbury, MA 02132</p>
+							
+						</div>
+						<div class="bar bar-default">
+							
+								<p>Visa: **** **** **** '.$paymentInfo.'</p>
+								<p>Exp: 07/16</p>
+							
+						</div>
+						
+					</div>
+										
+				</div>';
+
+//echo $html;
+
+?>

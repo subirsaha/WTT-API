@@ -1,0 +1,51 @@
+<?php
+$item_id = $_REQUEST["itemid"];
+$choiceLimit = $_REQUEST["choiceLimit"];
+$choicecat=$_REQUEST["choicecat"];
+
+//$choicecat=str_replace(" ", "", $choicecat);
+$selected_val = $_REQUEST["selected_val"];
+
+$json = file_get_contents("http://whatthetrucks.com:8080/Innovommerce/rest/itemchoicelist/choices?itemid=".$item_id."&choiceLimit=".$choiceLimit.""); // this WILL do an http request for you
+$data = json_decode($json, true);
+
+$html='';
+
+
+$counter=count($data['itemChoiceInfo']);
+
+
+$html.='<div class="inner-content">
+                    <form action="">
+                        <ul class="listingRadio">';
+                        for($i=0;$i<$counter;$i++)
+						{
+							if($data['itemChoiceInfo'][$i]['choiceCategory']==$choicecat && $data['itemChoiceInfo'][$i]['choiceGroup']=="true")
+							{
+								$id_item=$i.'Item'.$choicecat;
+		                            $html.='<li>
+		                                <div class="inputRadio">
+		                                    <input type="radio" name="Item" id="'.$id_item.'" ';if($id_item==$selected_val){ $html.=' checked '; } else { $html.=' '; } $html.=' data-role="none"  onclick = "MyRadio1(\'' . $id_item . '\',\'' . $data['itemChoiceInfo'][$i]['id'] . '\',\'' . $data['itemChoiceInfo'][$i]['choicePrice'] . '\',\'' . $choicecat . '\',\'' . $data['itemChoiceInfo'][$i]['choiceName'] . '\')" />
+		                                    <label for="'.$id_item.'">'.$data['itemChoiceInfo'][$i]['choiceName']; if($data['itemChoiceInfo'][$i]['choicePrice']!="0.0"){ $html.=' ( $'.$data['itemChoiceInfo'][$i]['choicePrice'].' )'; } $html.='</label>
+		                                </div>
+		                            </li>';
+		                     }
+
+		                    else if($data['itemChoiceInfo'][$i]['choiceCategory']==$choicecat && $data['itemChoiceInfo'][$i]['choiceGroup']=="false")
+							{
+								$id_item=$i.'Item'.$choicecat;
+		                            $html.='<li>
+			                                <div class="inputRadio">
+			                                    <input type="checkbox" onclick="OnChangeCheckbox(this,\'' . $choicecat . '\');" name="extraItem" id="'.$id_item.'" data-role="none" value="'.$data['itemChoiceInfo'][$i]['choicePrice'].'++'.$data['itemChoiceInfo'][$i]['choiceName'].'++'.$data['itemChoiceInfo'][$i]['id']'"/>
+
+			                                    <label for="'.$id_item.'">'.$data['itemChoiceInfo'][$i]['choiceName']; if($data['itemChoiceInfo'][$i]['choicePrice']!="0.0"){ $html.=' ( $'.$data['itemChoiceInfo'][$i]['choicePrice'].' )'; } $html.='</label>
+
+			                                    
+			                                </div>
+			                            </li>';
+		                     }
+		                 }
+		                 echo $html;
+
+
+?>

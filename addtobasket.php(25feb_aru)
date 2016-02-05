@@ -1,0 +1,219 @@
+<?php
+$item_id = $_REQUEST["itemid"];
+$choiceLimit = $_REQUEST["choiceLimit"];
+$itemname = $_REQUEST["itemname"];
+$price = $_REQUEST["price"];
+$description = $_REQUEST["description"];
+$quantity=$_REQUEST["quantity"];
+$mode=$_REQUEST["mode"];
+$final_selected_string=$_REQUEST["final_selected_string"];
+
+if($final_selected_string!="")
+{
+	$main_explode=explode("@@",$final_selected_string);
+
+	for($a=0;$a<count($main_explode);$a++)
+	{
+		$second_explode=explode("^",$main_explode[$a]);
+
+		// echo "<pre>";
+		// print_r($second_explode);
+		// echo "</pre>";
+
+		if($second_explode[2]=="Bread")
+		{
+			$breadselected_id=$second_explode[0];
+		}
+		if($second_explode[2]=="Choice")
+		{
+			$choiceselected_id=$second_explode[0];
+		}
+		if($second_explode[2]=="Sauce")
+		{
+			$sauceselected_id=$second_explode[0];
+		}
+	}
+}
+
+
+
+
+
+
+
+ //echo "http://dookansserver.com/Innovommerce/rest/businessinfolist/itemswithchoiceft?itemid='".$item_id."'&choiceLimit='".$choiceLimit."'";
+
+$json = file_get_contents("http://dookansserver.com/Innovommerce/rest/itemchoicelist/choices?itemid=".$item_id."&choiceLimit=".$choiceLimit.""); // this WILL do an http request for you
+$data = json_decode($json, true);
+
+$html='';
+
+
+$val="plus";
+$val1="minus";
+// echo "<pre>";
+// print_r($data);
+// echo "</pre>";
+
+$bread='0';
+$extras='0';
+$Sauce='0';
+$Choice='0';
+$Size='0';
+$Drinks='0';
+
+
+$counter=count($data['itemChoiceInfo']);
+
+for($i=0;$i<$counter;$i++)
+{
+	if($data['itemChoiceInfo'][$i]['choiceCategory']=="Bread"){
+		$bread="1";
+	}
+
+	if($data['itemChoiceInfo'][$i]['choiceCategory']=="Extras"){
+		$extras="1";
+	}
+
+	if($data['itemChoiceInfo'][$i]['choiceCategory']=="Sauce"){
+		$Sauce="1";
+	}
+
+	if($data['itemChoiceInfo'][$i]['choiceCategory']=="Choice"){
+		$Choice="1";
+	}
+
+	if($data['itemChoiceInfo'][$i]['choiceCategory']=="Size"){
+		$Size="1";
+	}
+
+	// if($data['itemChoiceInfo'][$i]['choiceCategory']=="Size"){
+	// 	$Size="1";
+	// }
+
+	if($data['itemChoiceInfo'][$i]['choiceCategory']=="Drinks"){
+		$Drinks="1";
+	}
+}
+
+// echo $bread.','.$extras;
+
+
+
+$html.='<div class="inner-content">
+					
+					<div class="contactInfoHeader">					
+						<div class="bar bar-default">
+							<div class="search-result-box">
+								<h2><a class="ui-link" href="#">'.$itemname.'</a></h2>
+								<p>'.$description.'</p>
+								<div class="right-small-box">
+									<h5 id="set_price">$'.$price.'</h5>';
+									if($mode=="edit"){
+									 $html.='<input type="hidden" id="main_price_actual_value" name="main_price_actual_value" value="'.($price/$quantity).'" />';
+									}else{
+											 $html.='<input type="hidden" id="main_price_actual_value" name="main_price_actual_value" value="'.$price.'" />';
+									}
+								$html.='</div>
+							</div>
+						</div>
+						<div class="ui-bar ui-bar-blue">
+							<h2>Item Options</h2>
+						</div>
+					</div>
+					<div class="listGroup">
+						<div class="bar bar-default">
+							<form method="post" action="">
+							    <div class="increase-btn">
+							        <label for="name">Quantity</label>
+							        <div class="right">
+								        <div class="dec button" onclick="button_val(\'' . $val1 . '\',\'' . $price . '\')">-</div>
+								        <input type="text" name="french-hens" id="quantity"'; if($mode=="edit"){ $html.=' value="'.$quantity.'"'; } else { $html.=' value="1"'; }  $html.='readonly="true" data-theme="none" data-role="none">
+								        <div class="inc button" onclick="button_val(\'' . $val . '\',\'' . $price . '\')">+</div>
+							        </div>
+							    </div>
+							</form>
+						</div>';
+						if($bread=="1"){
+
+							if($mode=="edit")
+							{
+								$html.='<div class="bar bar-default">
+									<a href="#listingPage" onclick="show_choices(\'' . $item_id . '\',\'' . $choiceLimit . '\',\'' . $breadselected_id . '\',\'' . $mode . '\');" class="ui-link">Bread</a>
+								</div><input type="hidden" name="hasbread" id="hasbread" value="1" />';
+							}
+							else
+							{
+								$html.='<div class="bar bar-default">
+									<a href="#listingPage" onclick="show_choices(\'' . $item_id . '\',\'' . $choiceLimit . '\');" class="ui-link">Bread</a>
+								</div><input type="hidden" name="hasbread" id="hasbread" value="1" />';
+							}
+						
+						}else{
+							$html.='<input type="hidden" name="hasbread" id="hasbread" value="0" />';
+						}
+						if($extras=="1"){
+							$html.='<div class="bar bar-default">
+								<a href="#listingPage" onclick="show_extras(\'' . $item_id . '\',\'' . $choiceLimit . '\');" class="ui-link">Extras</a>
+							</div><input type="hidden" name="hasextra" id="hasextra" value="1" />';
+						}else{
+							$html.='<input type="hidden" name="hasextra" id="hasextra" value="0" />';
+						}
+						if($Sauce=="1"){
+
+							if($mode=="edit")
+							{
+								$html.='<div class="bar bar-default">
+									<a href="#listingPage" onclick="show_Sauce(\'' . $item_id . '\',\'' . $choiceLimit . '\',\'' . $sauceselected_id . '\',\'' . $mode . '\');" class="ui-link">Sauce</a>
+								</div><input type="hidden" name="hassauce" id="hassauce" value="1" />';
+							}
+							else
+							{
+								$html.='<div class="bar bar-default">
+								<a href="#listingPage" onclick="show_Sauce(\'' . $item_id . '\',\'' . $choiceLimit . '\');" class="ui-link">Sauce</a>
+							 </div><input type="hidden" name="hassauce" id="hassauce" value="1" />';
+							}
+							
+						}else{
+							$html.='<input type="hidden" name="hassauce" id="hassauce" value="0" />';
+						}
+						if($Choice=="1"){
+
+							if($mode=="edit")
+							{
+								$html.='<div class="bar bar-default">
+									<a href="#listingPage" onclick="show_Choice(\'' . $item_id . '\',\'' . $choiceLimit . '\',\'' . $choiceselected_id . '\',\'' . $mode . '\');" class="ui-link">Choice</a>
+								</div><input type="hidden" name="haschoice" id="haschoice" value="1" />';
+							}
+							else
+							{
+								$html.='<div class="bar bar-default">
+								<a href="#listingPage" onclick="show_Choice(\'' . $item_id . '\',\'' . $choiceLimit . '\');" class="ui-link">Choice</a>
+								</div><input type="hidden" name="haschoice" id="haschoice" value="1" />';
+							}
+							
+						}else{
+							$html.='<input type="hidden" name="haschoice" id="haschoice" value="0" />';
+						}
+
+						if($Size=="1"){
+							$html.='<div class="bar bar-default">
+								<a href="#listingPage" onclick="show_Size(\'' . $item_id . '\',\'' . $choiceLimit . '\');" class="ui-link">Size</a>
+							</div>';
+						}
+
+						if($Drinks=="1"){
+							$html.='<div class="bar bar-default">
+								<a href="#listingPage" onclick="show_Drinks(\'' . $item_id . '\',\'' . $choiceLimit . '\');" class="ui-link">Drinks</a>
+							</div>';
+						}
+
+						$html.='<div class="bar bar-default">
+							<a href="#specialInstructions" onclick="instructions(\'' . $itemname . '\',\'' . $description . '\',\'' . $price . '\');" id="description" class="ui-link">Special Instructions <small>(additional charges may apply)</small></a>
+						</div>
+					</div>
+					
+				</div>';
+													
+ echo $html;
+?>

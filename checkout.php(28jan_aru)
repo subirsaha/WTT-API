@@ -1,0 +1,93 @@
+<?php
+
+$string = $_REQUEST["string"];
+$explode = explode("=====", $string);
+
+
+
+$html = '<div class="inner-content">
+					<div class="contactInfoHeader">		
+						<div class="headerTopBox">
+							<h2><a class="ui-link" href="#">Benny’s Crepe Cafe</a></h2>
+							<span class="icon-block location">Rings Fountain at Milk Street</span>
+							<div class="inline-icon">
+								<span class="icon-block time"><b>10am - 6:30pm</b></span>
+								<span class="icon-block order right"><b>Pickup: </b> 35 min</span>
+							</div>
+						</div>
+					</div>
+					
+					<div class="fullWidth">
+						<table data-role="table" data-mode="columntoggle" class="ui-body-d ui-shadow table-stripe table-stroke ui-responsive" data-column-btn-theme="b" >
+							<thead>
+								<tr class="ui-bar-d ui-bar-blue">
+									<th>QTY</th>
+									<th>ITEM</th>
+									<th>PRICE</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>';
+								for ($i=0; $i < (count($explode)-1); $i++) { 
+
+								$expld = explode("##", $explode[$i]);
+
+								$html .= '<tr>
+									<th>'.$expld[0].'</th>
+									<td>
+									<p class="split-text">
+										'.$expld[3].' <small> + '.$expld[1].'</small>
+									</p></td>
+									<td>$'.$expld[4].'</td>
+									<td><a href="#" class="delete"></a></td>
+									</tr>';
+
+
+								# code...
+							}
+							$html .= '</tbody>
+						</table>
+					</div>
+					<div class="total">
+						<p>
+							<span class="left-label"><b>Subtotal:</b></span>
+							<span class="right">$16.00</span>
+						</p>
+						<p>
+							<span class="left-label"><b>Tax:</b></span>
+							<span class="right">$1.25</span>
+						</p>
+						<p>
+							<span class="left-label"><b>Tip:</b></span>
+							<span class="right"><input type="text" data-role="none" class="tipBox"/></span>
+						</p>
+						<p style="font-size: 15px;">
+							<span class="left-label"><b>Total:</b></span>
+							<span class="right" style="font-size: 15px;"><b>$17.25</b></span>
+						</p>
+						
+					</div>
+					
+					<div class="listGroup">
+						<div class="bar bar-default">
+							<a href="#newAddress" class="ui-link">Add Contact Information</a>
+						</div>
+						<div class="bar bar-default">
+							<a href="#paymentMethod" class="ui-link">Select Payment</a>
+						</div>
+						<div class="bar bar-default">
+							<a href="#pickUp" class="ui-link">Change Pickup Time</a>
+						</div>
+						<div class="bar bar-default">
+							<a href="#" class="ui-link">Special Instructions <small>(Additional charges may apply)</small></a>
+						</div>
+					</div>
+										
+				</div>
+			';
+
+							
+
+
+echo $html;
+?>
